@@ -164,6 +164,7 @@ var MsWindowManager = class MsWindowManager extends MsManager {
             metaWindow,
         });
 
+        //this.scheduleCheckForAssignations();
         this.checkWindowsForAssignations();
     }
 
@@ -174,6 +175,7 @@ var MsWindowManager = class MsWindowManager extends MsManager {
             checked: false,
         });
 
+        //this.scheduleCheckForAssignations();
         this.checkWindowsForAssignations();
     }
 
@@ -322,7 +324,10 @@ var MsWindowManager = class MsWindowManager extends MsManager {
                 );
             }
         });
+        this.scheduleCheckForAssignations();
+    }
 
+    scheduleCheckForAssignations() {
         // Reschedule the next assignation check
         if (
             this.metaWindowWaitingForAssignationList.length ||

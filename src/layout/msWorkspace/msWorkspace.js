@@ -82,6 +82,7 @@ var MsWorkspace = class MsWorkspace {
     destroy() {
         this.layout.onDestroy();
         if (this.msWorkspaceActor) {
+            this.msWorkspaceActor.destroy_all_children();
             this.msWorkspaceActor.destroy();
             delete this.msWorkspaceActor;
         }
@@ -108,7 +109,7 @@ var MsWorkspace = class MsWorkspace {
             .map((msWindow) => {
                 return msWindow.state;
             });
-            
+
         if (this.layout) {
             this._state.layoutStateList[
                 this._state.layoutStateList.findIndex(

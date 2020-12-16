@@ -54,7 +54,7 @@ function enable() {
     log('----------------');
     if (Me.locked) {
         Me.locked = false;
-        Me.layout.panel.enable();
+        Me.layout.panel.scheduleEnable();
         return;
     }
     Me.imports.src.utils.debug.init();

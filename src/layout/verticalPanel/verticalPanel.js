@@ -1,5 +1,5 @@
 /** Gnome libs imports */
-const { St, GObject, Clutter, Gio } = imports.gi;
+const { St, GObject, Clutter, Gio, GLib } = imports.gi;
 const Main = imports.ui.main;
 
 /** Extension imports */
@@ -71,6 +71,12 @@ var MsPanel = GObject.registerClass(
                 this.queue_relayout();
             });
         }
+
+      scheduleEnable() {
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
+          this.enable();
+        });
+      }
 
         enable() {
             this.gnomeShellPanel.hide();

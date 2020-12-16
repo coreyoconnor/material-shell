@@ -613,6 +613,7 @@ var MsWindow = GObject.registerClass(
 
         removeDialog(dialog) {
             this.dialogs.splice(this.dialogs.indexOf(dialog), 1);
+            this.remove_child(dialog.clone);
             dialog.clone.destroy();
         }
 
@@ -742,7 +743,7 @@ var MsWindow = GObject.registerClass(
 
         fadeOutPlaceholder() {
             const onComplete = () => {
-                this.placeholder.set_opacity(255);
+                this.placeholder.set_opacity(254);
                 if (this.metaWindow) {
                     this.msContent.remove_child(this.placeholder);
                 }

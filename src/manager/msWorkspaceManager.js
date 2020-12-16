@@ -23,6 +23,7 @@ var MsWorkspaceManager = class MsWorkspaceManager extends MsManager {
         );
         this.windowTracker = Shell.WindowTracker.get_default();
         this.msWorkspaceList = [];
+        this.scheduledWindows = new Map;
         this.settings = getSettings('tweaks');
         this.metaWindowFocused = null;
         this.numOfMonitors = global.display.get_n_monitors();
@@ -431,13 +432,40 @@ var MsWorkspaceManager = class MsWorkspaceManager extends MsManager {
         });
     }
 
+    scheduleWindowAdded(workspace, window) {
+      if (this.scheduledWindows.has(workspace) && this.scheduledWindows.get(workspace).get(window)) {
+        return;
+      } else {
+        let schedule = true;
+        if (this.scheduledWindows.has(workspace) && this.scheduledWindows.get(workspace).get(window)) {
+            schedule = false;
+        }
+
+        if (schedule) {
+          if (this.scheduledWindows.has(workspace)) {
+            let forWorkspace = this.scheduledWindows.get(workspace);
+            forWorkspace.set(window, true);
+          } else {
+            let forWorkspace = new Map;
+            forWorkspace.set(window, true);
+            this.scheduledWindows.set(workspace, forWorkspace);
+          }
+
+          GLib.timeout_add(GLib.PRIORITY_DEFAULT, 200, () => {
+              this.scheduledWindows.get(workspace).delete(window);
+              this.metaWindowEnteredWorkspace(window, workspace);
+          });
+        }
+      }
+    }
+
     setupNewWorkspace(workspace, initialState) {
         this.createNewMsWorkspace(
             Main.layoutManager.primaryMonitor,
             initialState
         );
         this.observe(workspace, 'window-added', (workspace, window) => {
-            this.metaWindowEnteredWorkspace(window, workspace);
+            this.scheduleWindowAdded(workspace, window);
         });
     }
 
@@ -603,8 +631,10 @@ var MsWorkspaceManager = class MsWorkspaceManager extends MsManager {
     }
 
     metaWindowEnteredWorkspace(metaWindow, workspace) {
-        if (this.updatingMonitors || !metaWindow.get_compositor_private())
+        if (this.updatingMonitors || !metaWindow.get_compositor_private()) {
+            this.scheduleWindowAdded(workspace, metaWindow);
             return;
+        }
 
         let msWindow = metaWindow.msWindow;
         if (!msWindow) return;
@@ -622,6 +652,7 @@ var MsWorkspaceManager = class MsWorkspaceManager extends MsManager {
          */
         if (
             metaWindow.msWindow.msWorkspace &&
+            metaWindow.msWindow.msWorkspace.workspace &&
             metaWindow.msWindow.msWorkspace != msWorkspace &&
             global.display.get_current_time_roundtrip() - metaWindow.createdAt <
                 2000
@@ -651,7 +682,7 @@ var MsWorkspaceManager = class MsWorkspaceManager extends MsManager {
         }
         const msWorkspace = this.getMsWorkspacesOfMonitorIndex(monitorIndex)[0];
 
-        if (!msWorkspace) {
+        if (!msWorkspace || !metaWindow.msWindow) {
             return;
         }
         this.setWindowToMsWorkspace(metaWindow.msWindow, msWorkspace);

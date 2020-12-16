@@ -58,6 +58,7 @@ var TooltipManager = class TooltipManager extends MsManager {
     }
 
     createTooltip(actor, params) {
+        log("createTooltip");
         // If actor has text, use it instead because it may be updated
         let actorText;
         if (actor instanceof St.Label || actor instanceof Clutter.Text) {
