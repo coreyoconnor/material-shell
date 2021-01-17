@@ -4,6 +4,7 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 import * as GLib from 'GLib';
 import * as Gio from 'Gio';
 import * as GObject from 'GObject';
+import * as Clutter from 'Clutter';
 import * as St from 'St';
 const Main = imports.ui.main;
 const Signals = imports.signals;
@@ -201,7 +202,7 @@ function hideSplashScreens() {
         splashscreen.ease({
             opacity: 0,
             duration: 800,
-            transition: 'easeInQuad',
+            mode: Clutter.AnimationMode.EASE_IN_QUAD,
             onComplete: () => {
                 Main.layoutManager.removeChrome(splashscreen);
                 splashscreen.destroy();
