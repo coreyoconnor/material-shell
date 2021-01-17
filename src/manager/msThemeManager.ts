@@ -9,6 +9,7 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 import { ShellVersionMatch } from 'src/utils/compatibility';
 import { getSettings } from 'src/utils/settings';
 import { MsManager } from 'src/manager/msManager';
+import { byteArray } from "Gjs";
 
 /* exported VerticalPanelPositionEnum, HorizontalPanelPositionEnum, PanelIconStyleEnum, FocusEffectEnum, MsThemeManager */
 
@@ -193,7 +194,7 @@ export class MsThemeManager extends MsManager {
                 let [success, contents] = obj!.load_contents_finish(res);
                 if (success) {
                     //Read the binay content as string
-                    let content = imports.byteArray.toString(contents);
+                    let content = byteArray.toString(contents);
                     resolve(content);
                 } else {
                     reject(success);
@@ -204,7 +205,7 @@ export class MsThemeManager extends MsManager {
 
     async writeContentToFile(content: string, file: Gio.File) {
         return new Promise<Gio.File>((resolve, _) => {
-            const contentBytes = new GLib.Bytes(content);
+            const contentBytes = new GLib.Bytes(byteArray.fromString(content));
             file.replace_async(
                 null,
                 false,
