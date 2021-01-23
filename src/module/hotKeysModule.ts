@@ -9,6 +9,7 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 import { getSettings } from 'src/utils/settings';
 import { MsWindow } from 'src/layout/msWorkspace/msWindow';
 import { TilingLayoutByKey } from 'src/manager/layoutManager';
+import { MsApplicationLauncher } from 'src/widget/msApplicationLauncher';
 
 /* exported HotKeysModule, KeyBindingAction */
 
@@ -121,7 +122,10 @@ export class HotKeysModule {
             KeyBindingAction.MOVE_WINDOW_LEFT,
             () => {
                 const msWorkspace = Me.msWorkspaceManager.getActiveMsWorkspace();
-                msWorkspace.swapTileableLeft(msWorkspace.tileableFocused);
+                const focused = msWorkspace.tileableFocused;
+                if (focused !== null) {
+                    msWorkspace.swapTileableLeft(focused);
+                }
             }
         );
 
@@ -129,16 +133,18 @@ export class HotKeysModule {
             KeyBindingAction.MOVE_WINDOW_RIGHT,
             () => {
                 const msWorkspace = Me.msWorkspaceManager.getActiveMsWorkspace();
-
-                msWorkspace.swapTileableRight(msWorkspace.tileableFocused);
+                const focused = msWorkspace.tileableFocused;
+                if (focused !== null) {
+                    msWorkspace.swapTileableRight(focused);
+                }
             }
         );
 
         this.actionNameToActionMap.set(KeyBindingAction.MOVE_WINDOW_TOP, () => {
             const activeMsWorkspace = Me.msWorkspaceManager.getActivePrimaryMsWorkspace();
             if (
-                activeMsWorkspace.tileableFocused ===
-                activeMsWorkspace.appLauncher
+                activeMsWorkspace.tileableFocused instanceof MsApplicationLauncher ||
+                activeMsWorkspace.tileableFocused == null
             ) {
                 return;
             }
@@ -199,8 +205,8 @@ export class HotKeysModule {
             () => {
                 const activeMsWorkspace = Me.msWorkspaceManager.getActivePrimaryMsWorkspace();
                 if (
-                    activeMsWorkspace.tileableFocused ===
-                    activeMsWorkspace.appLauncher
+                    activeMsWorkspace.tileableFocused instanceof MsApplicationLauncher ||
+                    activeMsWorkspace.tileableFocused == null
                 ) {
                     return;
                 }
@@ -270,12 +276,14 @@ export class HotKeysModule {
             KeyBindingAction.RESIZE_WINDOW_LEFT,
             () => {
                 const msWorkspace = Me.msWorkspaceManager.getActiveMsWorkspace();
-
-                Me.msWindowManager.msResizeManager.resizeTileable(
-                    msWorkspace.tileableFocused,
-                    Meta.GrabOp.RESIZING_W,
-                    5
-                );
+                const focused = msWorkspace.tileableFocused;
+                if (focused !== null) {
+                    Me.msWindowManager.msResizeManager.resizeTileable(
+                        focused,
+                        Meta.GrabOp.RESIZING_W,
+                        5
+                    );
+                }
             }
         );
 
@@ -284,11 +292,14 @@ export class HotKeysModule {
             () => {
                 const msWorkspace = Me.msWorkspaceManager.getActiveMsWorkspace();
 
-                Me.msWindowManager.msResizeManager.resizeTileable(
-                    msWorkspace.tileableFocused,
-                    Meta.GrabOp.RESIZING_N,
-                    5
-                );
+                const focused = msWorkspace.tileableFocused;
+                if (focused !== null) {
+                    Me.msWindowManager.msResizeManager.resizeTileable(
+                        focused,
+                        Meta.GrabOp.RESIZING_N,
+                        5
+                    );
+                }
             }
         );
 
@@ -297,11 +308,14 @@ export class HotKeysModule {
             () => {
                 const msWorkspace = Me.msWorkspaceManager.getActiveMsWorkspace();
 
-                Me.msWindowManager.msResizeManager.resizeTileable(
-                    msWorkspace.tileableFocused,
-                    Meta.GrabOp.RESIZING_E,
-                    5
-                );
+                const focused = msWorkspace.tileableFocused;
+                if (focused !== null) {
+                    Me.msWindowManager.msResizeManager.resizeTileable(
+                        focused,
+                        Meta.GrabOp.RESIZING_E,
+                        5
+                    );
+                }
             }
         );
 
@@ -310,11 +324,14 @@ export class HotKeysModule {
             () => {
                 const msWorkspace = Me.msWorkspaceManager.getActiveMsWorkspace();
 
-                Me.msWindowManager.msResizeManager.resizeTileable(
-                    msWorkspace.tileableFocused,
-                    Meta.GrabOp.RESIZING_S,
-                    5
-                );
+                const focused = msWorkspace.tileableFocused;
+                if (focused !== null) {
+                    Me.msWindowManager.msResizeManager.resizeTileable(
+                        focused,
+                        Meta.GrabOp.RESIZING_S,
+                        5
+                    );
+                }
             }
         );
 
@@ -340,6 +357,9 @@ export class HotKeysModule {
                 KeyBindingAction[`MOVE_WINDOW_MONITOR_${DIRECTION}`],
                 () => {
                     const currentMsWorkspace = Me.msWorkspaceManager.getActiveMsWorkspace();
+                    const focused = currentMsWorkspace.tileableFocused;
+                    if (focused === null) return;
+
                     const monitorIndex = global.display.get_monitor_neighbor_index(
                         currentMsWorkspace.monitor.index,
                         Meta.DisplayDirection[DIRECTION]
@@ -354,7 +374,7 @@ export class HotKeysModule {
                                       monitorIndex
                                   )[0];
                         Me.msWorkspaceManager.setWindowToMsWorkspace(
-                            currentMsWorkspace.tileableFocused,
+                            focused,
                             msWorkspace
                         );
                         GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
@@ -384,9 +404,10 @@ export class HotKeysModule {
                     activeMsWorkspace
                 );
 
+                const focused = activeMsWorkspace.tileableFocused;
                 if (
-                    activeMsWorkspace.tileableFocused ===
-                        activeMsWorkspace.appLauncher ||
+                    focused instanceof MsApplicationLauncher ||
+                    focused === null ||
                     workspaceIndex === currentMsWorkspaceIndex
                 ) {
                     return;
@@ -403,7 +424,7 @@ export class HotKeysModule {
                 const nextMsWorkspace =
                     Me.msWorkspaceManager.primaryMsWorkspaces[workspaceIndex];
                 Me.msWorkspaceManager.setWindowToMsWorkspace(
-                    activeMsWorkspace.tileableFocused,
+                    focused,
                     nextMsWorkspace
                 );
 
