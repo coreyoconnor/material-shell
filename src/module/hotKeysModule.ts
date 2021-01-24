@@ -47,7 +47,7 @@ export const KeyBindingAction = {
 
 export class HotKeysModule {
     workspaceManager: Meta.WorkspaceManager;
-    settings: import("/home/arong/projects/gnome/material-shell/types/gio").Settings;
+    settings: import("types/gio").Settings;
     actionIdToNameMap: Map<any, any>;
     actionNameToActionMap: Map<any, any>;
     connectId: number;
